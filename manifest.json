@@ -1,12 +1,12 @@
 {
   "name": "VOCAB",
   "short_name": "VOCAB",
-  "description": "极简暗黑背单词工具",
-  "start_url": "./",
+  "description": "极简暗黑单词记忆 PWA",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#080808",
-  "theme_color": "#080808",
-  "orientation": "portrait-primary",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "icon-192.png",

@@ -1,331 +1,721 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="VOCAB">
-  <meta name="theme-color" content="#080808">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon-192.png">
-  <title>VOCAB</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg:       #080808;
-      --bg2:      #0f0f0f;
-      --bg3:      #161616;
-      --border:   #1e1e1e;
-      --dim:      #2a2a2a;
-      --muted:    #444;
-      --text-low: #555;
-      --text-mid: #888;
-      --text-hi:  #c8c8c8;
-      --white:    #f0f0f0;
-      --accent:   #4a9eff;
-      --danger:   #ff3a3a;
-    }
-    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-    html,body { width:100%; height:100%; background:var(--bg); color:var(--white);
-                font-family:'JetBrains Mono',monospace; overflow:hidden; user-select:none; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="VOCAB">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<title>VOCAB</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #1a1a1a;
+    --border: #2a2a2a;
+    --border2: #333333;
+    --text: #e8e8e8;
+    --text2: #aaaaaa;
+    --text3: #666666;
+    --accent: #c8a96e;
+    --accent2: #e8c98e;
+    --accent-dim: rgba(200,169,110,0.15);
+    --accent-glow: rgba(200,169,110,0.08);
+    --red: #c0392b;
+    --green: #27ae60;
+    --mono: 'JetBrains Mono', monospace;
+    --display: 'Bebas Neue', sans-serif;
+  }
 
-    /* ── LAYOUT ── */
-    #app { display:flex; flex-direction:column; height:100dvh;
-           padding: env(safe-area-inset-top,0) env(safe-area-inset-right,0)
-                    env(safe-area-inset-bottom,0) env(safe-area-inset-left,0); }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-    /* ── TOP BAR ── */
-    #topbar { display:flex; align-items:center; justify-content:space-between;
-              padding:14px 20px 10px; border-bottom:1px solid var(--border); flex-shrink:0; }
-    #logo { font-family:'Bebas Neue',sans-serif; font-size:18px;
-            letter-spacing:0.3em; color:var(--text-mid); }
-    .topbar-btn { background:none; border:none; color:var(--text-low);
-                  font-family:'JetBrains Mono',monospace; font-size:11px;
-                  letter-spacing:0.15em; cursor:pointer; padding:4px 8px;
-                  text-transform:uppercase; transition:color 0.15s; }
-    .topbar-btn:hover { color:var(--text-hi); }
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
 
-    /* ── STAGE ── */
-    #stage { flex:1; display:flex; flex-direction:column; align-items:center;
-             justify-content:center; position:relative; overflow:hidden; }
+  /* ── TOP BAR ── */
+  #topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: 52px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  #logo {
+    font-family: var(--display);
+    font-size: 26px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-shadow: 0 0 20px rgba(200,169,110,0.3);
+    user-select: none;
+  }
+  .topbtn {
+    background: none; border: 1px solid var(--border2);
+    color: var(--text2); font-family: var(--mono); font-size: 11px;
+    font-weight: 500; letter-spacing: 2px;
+    padding: 6px 14px; cursor: pointer;
+    transition: all 0.15s ease;
+    margin-left: 8px;
+  }
+  .topbtn:hover, .topbtn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-glow);
+  }
 
-    /* word row: big word + replay btn */
-    #word-row { display:flex; align-items:center; gap:16px; z-index:2; padding:0 20px; }
+  /* ── STAGE ── */
+  #stage {
+    position: fixed;
+    top: 52px; bottom: 0; left: 0; right: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 20px 20px 160px;
+  }
 
-    #word-display { font-family:'Bebas Neue',sans-serif;
-                    font-size:clamp(60px,18vw,160px); letter-spacing:0.04em;
-                    color:var(--white); line-height:1; pointer-events:none; }
-    #word-display.empty { opacity:0; }
-    #word-display.flash { animation:wordFlash 0.18s ease-out forwards; }
-    @keyframes wordFlash {
-      0%  { opacity:0; transform:scale(0.94); }
-      60% { opacity:1; transform:scale(1.02); }
-      100%{ opacity:1; transform:scale(1); }
-    }
+  /* Word row */
+  #word-row {
+    display: flex; align-items: center; gap: 16px;
+    max-width: 100%;
+  }
+  #word-display {
+    font-family: var(--display);
+    font-size: clamp(60px, 18vw, 160px);
+    line-height: 0.9;
+    color: var(--text);
+    letter-spacing: 2px;
+    text-align: center;
+    word-break: break-all;
+    transition: opacity 0.15s ease;
+    text-shadow: 0 0 40px rgba(232,232,232,0.05);
+    user-select: none;
+  }
+  #word-display.flash {
+    animation: wordFlash 0.12s ease;
+  }
+  @keyframes wordFlash {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+  }
 
-    /* replay button */
-    #btn-replay { background:none; border:1px solid var(--dim); color:var(--text-low);
-                  font-size:18px; width:36px; height:36px; cursor:pointer; flex-shrink:0;
-                  display:flex; align-items:center; justify-content:center;
-                  transition:color 0.15s, border-color 0.15s; opacity:0;
-                  pointer-events:none; margin-top:8px; }
-    #btn-replay.visible { opacity:1; pointer-events:auto; }
-    #btn-replay:hover { color:var(--accent); border-color:var(--accent); }
-    #btn-replay.spinning { animation:spin 0.4s linear; }
-    @keyframes spin { to { transform:rotate(360deg); } }
+  .word-btn {
+    background: none;
+    border: 1px solid var(--border2);
+    color: var(--text3);
+    font-size: 18px;
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+    border-radius: 2px;
+  }
+  .word-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-glow);
+  }
+  .word-btn:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+  }
+  .word-btn.shake {
+    animation: shake 0.3s ease;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
+  }
 
-    /* translation */
-    #trans-display { font-size:13px; color:var(--text-mid); letter-spacing:0.08em;
-                     margin-top:10px; min-height:20px; text-align:center; padding:0 20px;
-                     pointer-events:none; z-index:2; }
-    #trans-display.hidden { opacity:0; }
+  /* Record button */
+  #rec-btn {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 2px solid var(--border2);
+    background: var(--bg2);
+    color: var(--text2);
+    font-size: 20px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+    flex-shrink: 0;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  #rec-btn:hover { border-color: var(--red); color: var(--red); }
+  #rec-btn.recording {
+    border-color: var(--red);
+    background: rgba(192,57,43,0.15);
+    color: var(--red);
+    animation: pulse 1s ease infinite;
+  }
+  #rec-btn.has-rec {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(192,57,43,0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(192,57,43,0); }
+  }
 
-    /* glow */
-    #glow { position:absolute; width:60vw; height:60vw; max-width:400px; max-height:400px;
-            border-radius:50%; pointer-events:none; opacity:0; transform:scale(0.5);
-            background:radial-gradient(circle,rgba(74,158,255,0.06) 0%,transparent 70%); }
-    #glow.pulse { animation:glowPulse 1.2s ease-out forwards; }
-    @keyframes glowPulse {
-      0%  { opacity:1; transform:scale(0.3); }
-      60% { opacity:0.4; transform:scale(1.1); }
-      100%{ opacity:0; transform:scale(1.4); }
-    }
+  /* Note display */
+  #note-display {
+    margin-top: 24px;
+    font-size: clamp(14px, 3vw, 18px);
+    color: var(--accent2);
+    text-align: center;
+    max-width: 700px;
+    line-height: 1.6;
+    min-height: 28px;
+    letter-spacing: 0.5px;
+    font-weight: 300;
+  }
+  #note-display a { color: var(--accent); }
+  #note-display strong { color: var(--text); }
+  #note-display em { color: var(--text2); font-style: italic; }
+  #note-display code {
+    background: var(--bg3); padding: 1px 6px;
+    border-radius: 2px; font-size: 0.9em;
+  }
 
-    /* ── INPUT AREA (bottom of stage) ── */
-    #input-area { position:absolute; bottom:24px; left:50%; transform:translateX(-50%);
-                  width:min(480px, calc(100% - 40px)); z-index:10;
-                  display:flex; flex-direction:column; gap:8px; }
+  /* ── BOTTOM INPUT ── */
+  #bottom-area {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 12px 20px 20px;
+    background: linear-gradient(transparent, var(--bg) 30%);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .input-row {
+    display: flex; gap: 8px; align-items: center;
+  }
+  .vocab-input {
+    flex: 1;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 15px;
+    padding: 10px 14px;
+    outline: none;
+    letter-spacing: 1px;
+    transition: border-color 0.15s;
+    border-radius: 2px;
+  }
+  .vocab-input:focus { border-color: var(--accent); }
+  .vocab-input::placeholder { color: var(--text3); }
+  #word-input { text-align: center; font-size: 16px; font-weight: 500; }
 
-    .txt-input { width:100%; background:var(--bg3); border:1px solid var(--dim);
-                 color:var(--white); font-family:'JetBrains Mono',monospace;
-                 font-size:15px; letter-spacing:0.08em; padding:11px 14px;
-                 outline:none; transition:border-color 0.15s; caret-color:var(--accent); }
-    .txt-input::placeholder { color:var(--text-low); font-size:12px; letter-spacing:0.05em; }
-    .txt-input:focus { border-color:var(--muted); }
-    #word-input { text-align:center; font-size:16px; }
-    #word-input.flash-border { border-color:var(--accent); }
+  .save-btn {
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: var(--mono); font-size: 11px;
+    font-weight: 500; letter-spacing: 2px;
+    padding: 10px 16px; cursor: pointer;
+    transition: all 0.15s ease;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .save-btn:hover {
+    background: var(--accent);
+    color: var(--bg);
+  }
 
-    /* note input row */
-    #note-row { display:flex; gap:6px; }
-    #note-input { flex:1; }
-    #btn-save-note { background:none; border:1px solid var(--dim); color:var(--text-low);
-                     font-family:'JetBrains Mono',monospace; font-size:10px;
-                     letter-spacing:0.15em; padding:0 12px; cursor:pointer; flex-shrink:0;
-                     text-transform:uppercase; transition:color 0.15s, border-color 0.15s;
-                     white-space:nowrap; }
-    #btn-save-note:hover { color:var(--accent); border-color:var(--accent); }
-    #btn-save-note.saved { color:#3d9e5a; border-color:#3d9e5a; }
+  /* ── PANELS ── */
+  .panel {
+    position: fixed; top: 52px; left: 0; right: 0; bottom: 0;
+    background: var(--bg);
+    z-index: 50;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .panel.open { display: flex; }
 
-    /* note display under word */
-    #note-display { font-size:11px; color:var(--text-low); letter-spacing:0.06em;
-                    margin-top:6px; text-align:center; padding:0 20px;
-                    min-height:16px; z-index:2; font-style:italic; }
+  .panel-header {
+    padding: 20px 20px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px; letter-spacing: 3px; color: var(--text3);
+    font-weight: 500;
+  }
 
-    /* ── PANELS ── */
-    #panel-settings, #panel-history {
-      position:absolute; top:0; left:0; right:0; bottom:0;
-      background:var(--bg); z-index:20; display:flex; flex-direction:column;
-      transform:translateY(100%); transition:transform 0.28s cubic-bezier(0.22,1,0.36,1);
-    }
-    #panel-settings.open, #panel-history.open { transform:translateY(0); }
+  /* LIST Panel */
+  #list-panel .panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  #word-count { color: var(--accent); }
 
-    .panel-header { display:flex; align-items:center; justify-content:space-between;
-                    padding:16px 20px 14px; border-bottom:1px solid var(--border); flex-shrink:0; }
-    .panel-title { font-family:'Bebas Neue',sans-serif; font-size:16px;
-                   letter-spacing:0.3em; color:var(--text-mid); }
-    .panel-close { background:none; border:none; color:var(--text-low); font-size:18px;
-                   cursor:pointer; line-height:1; padding:4px; transition:color 0.15s; }
-    .panel-close:hover { color:var(--white); }
+  #history-list {
+    flex: 1; overflow-y: auto;
+    padding: 8px 0;
+  }
+  #history-list::-webkit-scrollbar { width: 3px; }
+  #history-list::-webkit-scrollbar-track { background: transparent; }
+  #history-list::-webkit-scrollbar-thumb { background: var(--border2); }
 
-    /* ── SETTINGS ── */
-    #settings-body { padding:24px 20px; overflow-y:auto; flex:1; }
-    .setting-row { margin-bottom:28px; }
-    .setting-label { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; }
-    .setting-name { font-size:11px; letter-spacing:0.2em; color:var(--text-mid); text-transform:uppercase; }
-    .setting-val { font-size:11px; color:var(--accent); letter-spacing:0.1em; min-width:40px; text-align:right; }
-    input[type=range] { -webkit-appearance:none; appearance:none; width:100%; height:2px;
-                        background:var(--dim); outline:none; cursor:pointer; }
-    input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; appearance:none;
-      width:14px; height:14px; background:var(--white); border-radius:0; cursor:pointer; transition:background 0.1s; }
-    input[type=range]::-webkit-slider-thumb:hover { background:var(--accent); }
-    input[type=range]::-moz-range-thumb { width:14px; height:14px; background:var(--white);
-      border-radius:0; border:none; cursor:pointer; }
-    .setting-desc { margin-top:6px; font-size:10px; color:var(--text-low); letter-spacing:0.05em; line-height:1.6; }
+  .history-item {
+    display: flex; align-items: center;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background 0.1s;
+    border-bottom: 1px solid transparent;
+    gap: 10px;
+  }
+  .history-item:hover { background: var(--bg2); }
+  .history-item:active { background: var(--bg3); }
 
-    /* ── HISTORY ── */
-    #history-body { flex:1; overflow-y:auto; padding:0; }
-    #history-body::-webkit-scrollbar { width:3px; }
-    #history-body::-webkit-scrollbar-thumb { background:var(--dim); }
-    .history-empty { text-align:center; color:var(--text-low); font-size:11px;
-                     letter-spacing:0.15em; padding:60px 20px; text-transform:uppercase; }
+  .hist-word {
+    font-family: var(--display);
+    font-size: 22px;
+    letter-spacing: 1px;
+    color: var(--text);
+    flex: 1;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hist-note {
+    font-size: 11px; color: var(--text3);
+    max-width: 140px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hist-rec-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    opacity: 0.8;
+  }
+  .hist-ts {
+    font-size: 10px; color: var(--text3); flex-shrink: 0;
+  }
+  .hist-del {
+    background: none; border: none;
+    color: var(--text3); font-size: 16px; cursor: pointer;
+    padding: 4px 6px; flex-shrink: 0;
+    transition: color 0.15s;
+    border-radius: 2px;
+  }
+  .hist-del:hover { color: var(--red); }
 
-    .history-item { display:flex; align-items:flex-start; padding:12px 20px;
-                    border-bottom:1px solid var(--border); cursor:pointer;
-                    transition:background 0.1s; gap:10px; }
-    .history-item:hover { background:var(--bg3); }
-    .hi-main { flex:1; min-width:0; }
-    .hi-word { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:0.06em;
-               color:var(--white); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .hi-trans { font-size:10px; color:var(--text-low); letter-spacing:0.04em; margin-top:2px;
-                overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .hi-note { font-size:10px; color:#4a7a4a; letter-spacing:0.04em; margin-top:3px;
-               font-style:italic; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .hi-del { background:none; border:none; color:var(--muted); font-size:16px;
-              cursor:pointer; flex-shrink:0; padding:4px; line-height:1;
-              transition:color 0.15s; align-self:center; }
-    .hi-del:hover { color:var(--danger); }
+  /* TUNE Panel */
+  #tune-panel { padding: 0; }
+  #tune-panel .panel-inner {
+    flex: 1; overflow-y: auto;
+    padding: 20px;
+  }
+  #tune-panel .panel-inner::-webkit-scrollbar { width: 3px; }
+  #tune-panel .panel-inner::-webkit-scrollbar-thumb { background: var(--border2); }
 
-    #hist-count { font-size:10px; color:var(--text-low); letter-spacing:0.1em; margin-left:4px; }
+  .tune-section {
+    margin-bottom: 28px;
+  }
+  .tune-label {
+    font-size: 10px; letter-spacing: 3px; color: var(--text3);
+    font-weight: 500; margin-bottom: 16px;
+    text-transform: uppercase;
+  }
 
-    /* audio status dot */
-    #audio-status { position:absolute; top:16px; right:60px; width:5px; height:5px;
-                    border-radius:50%; background:var(--dim); transition:background 0.2s; }
-    #audio-status.loading { background:#8a6a00; }
-    #audio-status.ready   { background:#3d9e5a; animation:dotPop 0.3s ease-out; }
-    #audio-status.error   { background:var(--danger); }
-    @keyframes dotPop { 0%{transform:scale(2)}100%{transform:scale(1)} }
-  </style>
+  /* Mode tabs */
+  #mode-tabs {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .mode-tab {
+    background: none;
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    font-family: var(--mono); font-size: 11px;
+    font-weight: 500; letter-spacing: 2px;
+    padding: 8px 18px; cursor: pointer;
+    transition: all 0.15s ease;
+    border-radius: 2px;
+  }
+  .mode-tab.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  /* Sliders */
+  .slider-row {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 14px;
+  }
+  .slider-name {
+    font-size: 11px; color: var(--text2);
+    width: 90px; flex-shrink: 0;
+    letter-spacing: 0.5px;
+  }
+  .slider-track {
+    flex: 1; position: relative; height: 2px;
+    background: var(--border2); cursor: pointer;
+  }
+  input[type=range] {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 2px;
+    background: transparent;
+    outline: none; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 2px; background: var(--border2); border-radius: 1px;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--accent);
+    margin-top: -6px;
+    box-shadow: 0 0 6px rgba(200,169,110,0.4);
+    transition: transform 0.1s;
+  }
+  input[type=range]::-webkit-slider-thumb:active { transform: scale(1.3); }
+  input[type=range]::-moz-range-thumb {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--accent); border: none;
+  }
+  .slider-val {
+    font-size: 11px; color: var(--accent);
+    width: 46px; text-align: right; flex-shrink: 0;
+    font-weight: 500;
+  }
+
+  /* Fine record panel */
+  #fine-panel {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.92);
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 24px;
+    backdrop-filter: blur(4px);
+  }
+  #fine-panel.open { display: flex; }
+  #fine-word-label {
+    font-family: var(--display);
+    font-size: clamp(40px, 12vw, 100px);
+    color: var(--accent);
+    letter-spacing: 2px;
+  }
+  #fine-status {
+    font-size: 12px; color: var(--text3); letter-spacing: 2px;
+    min-height: 20px;
+  }
+  .fine-btn-row { display: flex; gap: 12px; }
+  .fine-btn {
+    background: none;
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    font-family: var(--mono); font-size: 11px;
+    font-weight: 500; letter-spacing: 2px;
+    padding: 12px 24px; cursor: pointer;
+    transition: all 0.15s ease;
+    border-radius: 2px;
+  }
+  .fine-btn:hover { border-color: var(--text2); color: var(--text); }
+  .fine-btn.primary {
+    border-color: var(--green); color: var(--green);
+    background: rgba(39,174,96,0.08);
+  }
+  .fine-btn.primary:hover { background: rgba(39,174,96,0.18); }
+  .fine-btn.danger {
+    border-color: var(--red); color: var(--red);
+    background: rgba(192,57,43,0.08);
+  }
+  .fine-btn.danger:hover { background: rgba(192,57,43,0.18); }
+  #fine-cancel {
+    position: absolute; top: 20px; right: 20px;
+    background: none; border: none;
+    color: var(--text3); font-size: 24px; cursor: pointer;
+    padding: 8px;
+  }
+
+  /* Recording visualizer */
+  #rec-viz {
+    display: flex; align-items: center; gap: 3px; height: 32px;
+    opacity: 0; transition: opacity 0.2s;
+  }
+  #rec-viz.active { opacity: 1; }
+  .viz-bar {
+    width: 3px; background: var(--red); border-radius: 2px;
+    height: 4px; transition: height 0.05s ease;
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 180px; left: 50%; transform: translateX(-50%);
+    background: var(--bg3); border: 1px solid var(--border2);
+    color: var(--text2); font-size: 11px; letter-spacing: 1.5px;
+    padding: 8px 16px; z-index: 999;
+    opacity: 0; transition: opacity 0.2s ease;
+    pointer-events: none; white-space: nowrap; border-radius: 2px;
+  }
+  #toast.show { opacity: 1; }
+
+  /* Idle hint */
+  #idle-hint {
+    position: absolute;
+    font-size: 12px; color: var(--text3);
+    letter-spacing: 2px; pointer-events: none;
+    opacity: 0.6;
+  }
+
+  /* Scrollbar global */
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); }
+
+  /* Markdown rendered */
+  .md-rendered { display: inline; }
+</style>
 </head>
 <body>
-<div id="app">
-  <div id="topbar">
-    <span id="logo">VOCAB</span>
-    <div style="display:flex;gap:4px;align-items:center">
-      <div id="audio-status" title="audio status"></div>
-      <button class="topbar-btn" id="btn-history">LIST <span id="hist-count"></span></button>
-      <button class="topbar-btn" id="btn-settings">TUNE</button>
-    </div>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div id="logo">VOCAB</div>
+  <div style="display:flex;gap:6px">
+    <button class="topbtn" id="btn-list">LIST</button>
+    <button class="topbtn" id="btn-tune">TUNE</button>
   </div>
+</div>
 
-  <div id="stage">
-    <div id="glow"></div>
-    <div id="word-row">
-      <div id="word-display" class="empty">—</div>
-      <button id="btn-replay" title="重新播放">↺</button>
+<!-- STAGE -->
+<div id="stage">
+  <div id="word-row">
+    <button class="word-btn" id="btn-replay" title="重播" disabled>↺</button>
+    <div id="word-display">—</div>
+    <button class="word-btn" id="btn-tts" title="参考读音">🔊</button>
+    <button id="rec-btn" title="长按快速录音 / 单击精细录音">🎙</button>
+  </div>
+  <div id="note-display"></div>
+  <div id="idle-hint">输入单词开始</div>
+</div>
+
+<!-- BOTTOM INPUT -->
+<div id="bottom-area">
+  <div class="input-row">
+    <input class="vocab-input" id="word-input" type="text"
+      placeholder="ENTER WORD" autocomplete="off" autocorrect="off"
+      autocapitalize="characters" spellcheck="false">
+  </div>
+  <div class="input-row">
+    <input class="vocab-input" id="note-input" type="text"
+      placeholder="注释（支持 **粗体** *斜体* `代码`）">
+    <button class="save-btn" id="btn-save">SAVE</button>
+  </div>
+</div>
+
+<!-- LIST PANEL -->
+<div class="panel" id="list-panel">
+  <div class="panel-header">
+    <span>WORD LIST</span>
+    <span id="word-count">0 words</span>
+  </div>
+  <div id="history-list"></div>
+</div>
+
+<!-- TUNE PANEL -->
+<div class="panel" id="tune-panel">
+  <div class="panel-header">AUDIO SETTINGS</div>
+  <div class="panel-inner">
+    <div class="tune-section">
+      <div class="tune-label">音效模式</div>
+      <div id="mode-tabs">
+        <button class="mode-tab active" data-mode="ECHO">ECHO</button>
+        <button class="mode-tab" data-mode="ROBOT">ROBOT</button>
+        <button class="mode-tab" data-mode="SPACE">SPACE</button>
+        <button class="mode-tab" data-mode="PHONE">PHONE</button>
+      </div>
     </div>
-    <div id="note-display"></div>
-    <div id="trans-display" class="hidden"></div>
-
-    <div id="input-area">
-      <input id="word-input" class="txt-input" type="text"
-             placeholder="type a word · press enter"
-             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-      <div id="note-row">
-        <input id="note-input" class="txt-input" type="text"
-               placeholder="add a note for current word (optional)"
-               autocomplete="off" spellcheck="false">
-        <button id="btn-save-note">SAVE</button>
+    <div class="tune-section">
+      <div class="tune-label">叠加参数</div>
+      <div class="slider-row">
+        <span class="slider-name">影分身层数</span>
+        <input type="range" id="sl-layers" min="1" max="8" value="3" step="1">
+        <span class="slider-val" id="val-layers">3</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-name">错开时距</span>
+        <input type="range" id="sl-offset" min="5" max="400" value="80" step="5">
+        <span class="slider-val" id="val-offset">80ms</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-name">尾音衰减</span>
+        <input type="range" id="sl-decay" min="0.10" max="0.95" value="0.65" step="0.05">
+        <span class="slider-val" id="val-decay">0.65</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-name">发音速率</span>
+        <input type="range" id="sl-rate" min="0.4" max="1.5" value="0.9" step="0.05">
+        <span class="slider-val" id="val-rate">0.9×</span>
       </div>
     </div>
   </div>
 </div>
 
-<!-- SETTINGS PANEL -->
-<div id="panel-settings">
-  <div class="panel-header">
-    <span class="panel-title">TUNE</span>
-    <button class="panel-close" id="close-settings">✕</button>
+<!-- FINE RECORD PANEL -->
+<div id="fine-panel">
+  <button id="fine-cancel">✕</button>
+  <div id="fine-word-label">—</div>
+  <div id="rec-viz">
+    <div class="viz-bar"></div><div class="viz-bar"></div>
+    <div class="viz-bar"></div><div class="viz-bar"></div>
+    <div class="viz-bar"></div><div class="viz-bar"></div>
+    <div class="viz-bar"></div><div class="viz-bar"></div>
   </div>
-  <div id="settings-body">
-    <div class="setting-row">
-      <div class="setting-label"><span class="setting-name">影分身层数</span><span class="setting-val" id="val-layers">4</span></div>
-      <input type="range" id="sl-layers" min="1" max="8" step="1" value="4">
-      <div class="setting-desc">同时叠加几个声音。层数越多音越厚重。</div>
-    </div>
-    <div class="setting-row">
-      <div class="setting-label"><span class="setting-name">错开时距</span><span class="setting-val" id="val-offset">60 ms</span></div>
-      <input type="range" id="sl-offset" min="5" max="400" step="5" value="60">
-      <div class="setting-desc">每层起始时间偏移。5ms→电子颤音，400ms→大合唱回声。</div>
-    </div>
-    <div class="setting-row">
-      <div class="setting-label"><span class="setting-name">尾音衰减</span><span class="setting-val" id="val-decay">0.55</span></div>
-      <input type="range" id="sl-decay" min="0.1" max="0.95" step="0.05" value="0.55">
-      <div class="setting-desc">后续层音量倍率。0.1→几乎无尾音，0.95→各层等响。</div>
-    </div>
-    <div class="setting-row">
-      <div class="setting-label"><span class="setting-name">发音速率</span><span class="setting-val" id="val-rate">0.85</span></div>
-      <input type="range" id="sl-rate" min="0.4" max="1.5" step="0.05" value="0.85">
-      <div class="setting-desc">TTS 语速。推荐 0.7–0.9 更有质感。</div>
-    </div>
-    <div class="setting-row">
-      <div class="setting-label"><span class="setting-name">中文读义</span><span class="setting-val" id="val-zh">开</span></div>
-      <input type="range" id="sl-zh" min="0" max="1" step="1" value="1">
-      <div class="setting-desc">英文回声彻底消失后，是否自动朗读中文释义。</div>
-    </div>
+  <div id="fine-status">单击录音开始</div>
+  <div class="fine-btn-row" id="fine-btn-row">
+    <button class="fine-btn danger" id="fine-rec-btn">● 录音</button>
+    <button class="fine-btn" id="fine-play-btn" disabled>▶ 试听</button>
+    <button class="fine-btn primary" id="fine-confirm-btn" disabled>✓ 确认</button>
   </div>
 </div>
 
-<!-- HISTORY PANEL -->
-<div id="panel-history">
-  <div class="panel-header">
-    <span class="panel-title">HISTORY</span>
-    <button class="panel-close" id="close-history">✕</button>
-  </div>
-  <div id="history-body"><div class="history-empty">暂无记录</div></div>
-</div>
+<!-- TOAST -->
+<div id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════════════════
-//  CONFIG
-// ═══════════════════════════════════════════════════════
-const cfg = { layers:4, offset:60, decay:0.55, rate:0.85, zhEnabled:true };
-const savedCfg = JSON.parse(localStorage.getItem('vocab-cfg') || '{}');
-Object.assign(cfg, savedCfg);
+// ═══════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════
 
-// ═══════════════════════════════════════════════════════
-//  INDEXEDDB  — two stores: 'words' and 'notes'
-//  notes survive word deletion intentionally
-// ═══════════════════════════════════════════════════════
-let db;
-async function initDB() {
-  return new Promise((res, rej) => {
-    const req = indexedDB.open('vocab-v2', 2);
-    req.onupgradeneeded = e => {
+function $(id) { return document.getElementById(id); }
+
+function toast(msg, dur = 1800) {
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove('show'), dur);
+}
+
+// Simple markdown → html (inline only)
+function renderMd(text) {
+  if (!text) return '';
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`(.+?)`/g, '<code>$1</code>');
+}
+
+function formatTs(ts) {
+  const d = new Date(ts);
+  const now = new Date();
+  const diff = now - d;
+  if (diff < 60000) return 'just now';
+  if (diff < 3600000) return Math.floor(diff/60000) + 'm';
+  if (diff < 86400000) return Math.floor(diff/3600000) + 'h';
+  return (d.getMonth()+1) + '/' + d.getDate();
+}
+
+// ═══════════════════════════════════════════════
+// INDEXEDDB
+// ═══════════════════════════════════════════════
+
+const DB_NAME = 'vocab-db';
+const DB_VERSION = 3;
+let db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = (e) => {
       const d = e.target.result;
       if (!d.objectStoreNames.contains('words')) {
-        const s = d.createObjectStore('words', { keyPath:'word' });
-        s.createIndex('ts','ts',{ unique:false });
+        const ws = d.createObjectStore('words', { keyPath: 'word' });
+        ws.createIndex('ts', 'ts', { unique: false });
       }
       if (!d.objectStoreNames.contains('notes')) {
-        d.createObjectStore('notes', { keyPath:'word' });
+        d.createObjectStore('notes', { keyPath: 'word' });
+      }
+      if (!d.objectStoreNames.contains('recordings')) {
+        d.createObjectStore('recordings', { keyPath: 'word' });
       }
     };
-    req.onsuccess = e => { db = e.target.result; res(); };
-    req.onerror   = () => rej(req.error);
+    req.onsuccess = (e) => { db = e.target.result; resolve(db); };
+    req.onerror = (e) => reject(e);
   });
 }
-function dbOp(store, mode, fn) {
-  return new Promise((res, rej) => {
-    const tx = db.transaction(store, mode);
-    const op = fn(tx.objectStore(store));
-    if (op) { op.onsuccess = () => res(op.result); op.onerror = () => rej(op.error); }
-    else { tx.oncomplete = res; tx.onerror = () => rej(tx.error); }
-  });
-}
-const dbPutWord   = r  => dbOp('words','readwrite', s => { s.put(r); return null; });
-const dbDelWord   = w  => dbOp('words','readwrite', s => { s.delete(w); return null; });
-const dbPutNote   = r  => dbOp('notes','readwrite', s => { s.put(r); return null; });
-const dbGetNote   = w  => dbOp('notes','readonly',  s => s.get(w));
-const dbGetAllWords = () => new Promise((res,rej) => {
-  const tx  = db.transaction('words','readonly');
-  const req = tx.objectStore('words').index('ts').openCursor(null,'prev');
-  const out = [];
-  req.onsuccess = e => { const c=e.target.result; if(c){out.push(c.value);c.continue();}else res(out); };
-  req.onerror   = () => rej(req.error);
-});
 
-// ═══════════════════════════════════════════════════════
-//  AUDIO ENGINE — Edge TTS (WebSocket, 免Key, 无CORS限制)
-//  流程：wss → 收mp3块 → decodeAudioData → AudioBuffer
-//        → AudioContext 精确多层叠加
-//  fallback：Web Speech API（调度法）
-// ═══════════════════════════════════════════════════════
+function dbPut(store, obj) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readwrite');
+    tx.objectStore(store).put(obj);
+    tx.oncomplete = res; tx.onerror = rej;
+  });
+}
+function dbGet(store, key) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readonly');
+    const req = tx.objectStore(store).get(key);
+    req.onsuccess = () => res(req.result);
+    req.onerror = rej;
+  });
+}
+function dbDelete(store, key) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readwrite');
+    tx.objectStore(store).delete(key);
+    tx.oncomplete = res; tx.onerror = rej;
+  });
+}
+function dbGetAll(store) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readonly');
+    const req = tx.objectStore(store).getAll();
+    req.onsuccess = () => res(req.result);
+    req.onerror = rej;
+  });
+}
+function dbGetAllKeys(store) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readonly');
+    const req = tx.objectStore(store).getAllKeys();
+    req.onsuccess = () => res(req.result);
+    req.onerror = rej;
+  });
+}
+
+// Float32Array serialization for AudioBuffer
+function audioBufferToObj(buf) {
+  const channels = [];
+  for (let i = 0; i < buf.numberOfChannels; i++) {
+    channels.push(Array.from(buf.getChannelData(i)));
+  }
+  return { sampleRate: buf.sampleRate, channels };
+}
+function objToAudioBuffer(obj, ctx) {
+  const buf = ctx.createBuffer(obj.channels.length, obj.channels[0].length, obj.sampleRate);
+  for (let i = 0; i < obj.channels.length; i++) {
+    buf.copyToChannel(new Float32Array(obj.channels[i]), i);
+  }
+  return buf;
+}
+
+// ═══════════════════════════════════════════════
+// AUDIO ENGINE
+// ═══════════════════════════════════════════════
+
 let audioCtx = null;
-let cachedBuffer = {};  // word → AudioBuffer
-let killToken   = 0;
+let syntheticIR = null;
+let currentMode = 'ECHO';
+
+const params = {
+  layers: 3,
+  offset: 80,   // ms
+  decay: 0.65,
+  rate: 0.9,
+};
 
 function getAudioCtx() {
   if (!audioCtx || audioCtx.state === 'closed') {
@@ -335,381 +725,631 @@ function getAudioCtx() {
   return audioCtx;
 }
 
-// ── Edge TTS via WebSocket ──────────────────────────────
-const EDGE_TOKEN = '6A5AA1D4EAFF4E9FB37E23D68491D6F4';
-const EDGE_WSS   = `wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=${EDGE_TOKEN}`;
-
-function edgeTTS(word, rate) {
-  return new Promise((resolve, reject) => {
-    // rate: 0.4–1.5 → Edge格式: -50% ~ +50%
-    const ratePercent = Math.round((rate - 1.0) * 100);
-    const rateStr = (ratePercent >= 0 ? '+' : '') + ratePercent + '%';
-
-    const reqId = crypto.randomUUID().replace(/-/g,'').toUpperCase();
-    const timestamp = new Date().toISOString();
-
-    const configMsg =
-      `X-Timestamp:${timestamp}\r\n` +
-      `Content-Type:application/json; charset=utf-8\r\n` +
-      `Path:speech.config\r\n\r\n` +
-      `{"context":{"synthesis":{"audio":{"metadataoptions":{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false},"outputFormat":"audio-24khz-48kbitrate-mono-mp3"}}}}`;
-
-    const ssml =
-      `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'>` +
-      `<voice name='en-US-AriaNeural'>` +
-      `<prosody rate='${rateStr}'>${word}</prosody>` +
-      `</voice></speak>`;
-
-    const ssmlMsg =
-      `X-RequestId:${reqId}\r\n` +
-      `Content-Type:application/ssml+xml\r\n` +
-      `X-Timestamp:${timestamp}\r\n` +
-      `Path:ssml\r\n\r\n` +
-      ssml;
-
-    let ws;
-    try { ws = new WebSocket(EDGE_WSS); }
-    catch(e) { reject(e); return; }
-    ws.binaryType = 'arraybuffer';
-
-    const audioChunks = []; // ArrayBuffer[]
-    let started = false;
-    const timer = setTimeout(() => { ws.close(); reject(new Error('edge tts timeout')); }, 10000);
-
-    ws.onopen = () => {
-      ws.send(configMsg);
-      ws.send(ssmlMsg);
-    };
-
-    ws.onmessage = e => {
-      if (typeof e.data === 'string') {
-        if (e.data.includes('Path:turn.end')) {
-          clearTimeout(timer);
-          ws.close();
-          // 合并所有 mp3 chunk
-          const total = audioChunks.reduce((s, b) => s + b.byteLength, 0);
-          const merged = new Uint8Array(total);
-          let offset = 0;
-          for (const chunk of audioChunks) {
-            merged.set(new Uint8Array(chunk), offset);
-            offset += chunk.byteLength;
-          }
-          const ctx = getAudioCtx();
-          ctx.decodeAudioData(merged.buffer.slice(0))
-            .then(resolve)
-            .catch(reject);
-        }
-      } else {
-        // 二进制帧：头部是文本头，音频数据在 "Path:audio\r\n\r\n" 之后
-        const view  = new Uint8Array(e.data);
-        // 找分隔符 "Path:audio\r\n\r\n"
-        const header = new TextDecoder().decode(view.slice(0, Math.min(256, view.byteLength)));
-        const sepIdx = header.indexOf('Path:audio\r\n\r\n');
-        if (sepIdx !== -1) {
-          // 头部字节长度：前2字节是头长度（big-endian uint16）
-          const headerByteLen = (view[0] << 8) | view[1];
-          const audioData = e.data.slice(headerByteLen + 2);
-          if (audioData.byteLength > 0) audioChunks.push(audioData);
-        }
-      }
-    };
-
-    ws.onerror = e => { clearTimeout(timer); reject(new Error('ws error')); };
-    ws.onclose = () => { clearTimeout(timer); };
-  });
-}
-
-// ── Web Speech 调度法 fallback ──────────────────────────
-function playScheduledSpeech(word, token) {
-  const { layers, offset, decay, rate } = cfg;
-  speechSynthesis.cancel();
-  const estDuration = Math.max(500, word.length * 100 / rate);
-  for (let i = 0; i < layers; i++) {
-    setTimeout(() => {
-      if (killToken !== token) return;
-      const u    = new SpeechSynthesisUtterance(word);
-      u.lang     = 'en-US';
-      u.rate     = rate;
-      u.volume   = Math.pow(decay, i);
-      u.pitch    = 1.0 - i * 0.02;
-      speechSynthesis.speak(u);
-    }, i * offset);
-  }
-  return (layers - 1) * offset + estDuration;
-}
-
-// ── 主入口 ──────────────────────────────────────────────
-async function fetchTTSBuffer(word) {
-  if (cachedBuffer[word]) {
-    setAudioStatus('ready');
-    return { buf: cachedBuffer[word], fallback: false };
-  }
-  setAudioStatus('loading');
-  try {
-    const buf = await edgeTTS(word, cfg.rate);
-    cachedBuffer[word] = buf;
-    setAudioStatus('ready');
-    return { buf, fallback: false };
-  } catch(e) {
-    console.warn('Edge TTS failed:', e.message);
-    setAudioStatus('error');
-    return { buf: null, fallback: true };
-  }
-}
-
-// ── 多层叠加播放，sample-accurate ───────────────────────
-function playLayered(buffer, token) {
-  if (!buffer) return 0;
-  const ctx      = getAudioCtx();
-  const { layers, offset, decay } = cfg;
-  const offsetSec = offset / 1000;
-  const now       = ctx.currentTime;
-  for (let i = 0; i < layers; i++) {
-    if (killToken !== token) return 0;
-    const src  = ctx.createBufferSource();
-    const gain = ctx.createGain();
-    src.buffer = buffer;
-    src.connect(gain);
-    gain.connect(ctx.destination);
-    gain.gain.value = Math.pow(decay, i);
-    src.start(now + i * offsetSec);
-  }
-  const lastStart = (layers - 1) * offsetSec;
-  return (lastStart + buffer.duration) * 1000;
-}
-
-// Chinese TTS via Web Speech API (still fine for a single utterance)
-let zhTimer = null;
-function speakChinese(text) {
-  clearTimeout(zhTimer);
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'zh-CN'; u.rate = 0.95; u.volume = 0.9;
-  const voices = speechSynthesis.getVoices();
-  const v = voices.find(x => x.lang.startsWith('zh'));
-  if (v) u.voice = v;
-  speechSynthesis.cancel();
-  speechSynthesis.speak(u);
-}
-
-// Main trigger
-async function triggerWord(word) {
-  if (!word.trim()) return;
-  const w = word.trim().toLowerCase();
-
-  killToken++;                   // instantly kills any ongoing layered play
-  clearTimeout(zhTimer);
-  speechSynthesis.cancel();
-
-  wordInput.value = '';
-  showWord(w);
-
-  // fetch audio (may be cached)
-  const { buf, fallback } = await fetchTTSBuffer(w);
-  const myToken = killToken;     // capture after fetch completes
-
-  if (killToken !== myToken) return; // another word was triggered while fetching
-
-  let finishMs;
-  if (fallback) {
-    finishMs = playScheduledSpeech(w, myToken);
-  } else {
-    finishMs = playLayered(buf, myToken);
-  }
-
-  // schedule Chinese
-  if (cfg.zhEnabled) {
-    const trans = transCache[w];
-    if (trans) {
-      const zhText = trans.replace(/[a-z]+[\uff1a:]/gi,'').replace(/\//g,'，');
-      zhTimer = setTimeout(() => {
-        if (killToken === myToken) speakChinese(zhText);
-      }, finishMs + 200);
+function getSyntheticIR(ctx) {
+  if (syntheticIR) return syntheticIR;
+  const len = ctx.sampleRate * 2;
+  const ir = ctx.createBuffer(2, len, ctx.sampleRate);
+  for (let c = 0; c < 2; c++) {
+    const d = ir.getChannelData(c);
+    for (let i = 0; i < len; i++) {
+      d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.5);
     }
   }
-
-  // save word
-  await dbPutWord({ word:w, ts:Date.now(), trans: transCache[w]||'' });
-  await loadHistory();
-
-  // load note for this word
-  const noteRec = await dbGetNote(w);
-  noteDisplay.textContent = noteRec ? noteRec.note : '';
-  noteInput.value = noteRec ? noteRec.note : '';
-  currentWord = w;
+  syntheticIR = ir;
+  return ir;
 }
 
-// ═══════════════════════════════════════════════════════
-//  TRANSLATION CACHE
-// ═══════════════════════════════════════════════════════
-const transCache = {};
-async function getTranslation(word) {
-  if (transCache[word]) return transCache[word];
-  try {
-    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`,
-      { signal: AbortSignal.timeout(4000) });
-    if (!res.ok) throw 0;
-    const data = await res.json();
-    const meanings = data[0]?.meanings ?? [];
-    const parts = meanings.slice(0,2).map(m => {
-      const def = m.definitions[0]?.definition ?? '';
-      return `${m.partOfSpeech}：${def.slice(0,40)}${def.length>40?'…':''}`;
-    });
-    const result = parts.join('  /  ') || '';
-    transCache[word] = result;
-    return result;
-  } catch { transCache[word]=''; return ''; }
+function makeDistortionCurve(amount) {
+  const n = 256;
+  const curve = new Float32Array(n);
+  const deg = Math.PI / 180;
+  for (let i = 0; i < n; i++) {
+    const x = (i * 2) / n - 1;
+    curve[i] = ((3 + amount) * x * 20 * deg) / (Math.PI + amount * Math.abs(x));
+  }
+  return curve;
 }
 
-// ═══════════════════════════════════════════════════════
-//  UI ELEMENTS
-// ═══════════════════════════════════════════════════════
-const wordDisplay  = document.getElementById('word-display');
-const transDisplay = document.getElementById('trans-display');
-const noteDisplay  = document.getElementById('note-display');
-const wordInput    = document.getElementById('word-input');
-const noteInput    = document.getElementById('note-input');
-const btnSaveNote  = document.getElementById('btn-save-note');
-const btnReplay    = document.getElementById('btn-replay');
-const glowEl       = document.getElementById('glow');
-const histCount    = document.getElementById('hist-count');
-const historyBody  = document.getElementById('history-body');
-const audioStatus  = document.getElementById('audio-status');
+// killToken
+let killToken = 0;
+
+function playAudioBuffer(buffer) {
+  killToken++;
+  const myToken = killToken;
+  const ctx = getAudioCtx();
+  const { layers, offset, decay } = params;
+  const mode = currentMode;
+  const now = ctx.currentTime;
+
+  const dest = ctx.destination;
+
+  // PHONE: single chain, no layering on dry signal
+  if (mode === 'PHONE') {
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+    const bpf = ctx.createBiquadFilter();
+    bpf.type = 'bandpass';
+    bpf.frequency.value = 1800;
+    bpf.Q.value = 0.8;
+    const wave = ctx.createWaveShaper();
+    wave.curve = makeDistortionCurve(60);
+    wave.oversample = '2x';
+    const gain = ctx.createGain();
+    gain.gain.value = 1.4;
+    src.connect(bpf); bpf.connect(wave); wave.connect(gain); gain.connect(dest);
+    src.start(now);
+    return;
+  }
+
+  // SPACE: convolver setup
+  let convolver = null;
+  let spaceDelay = null;
+  let spaceGain = null;
+  if (mode === 'SPACE') {
+    convolver = ctx.createConvolver();
+    convolver.buffer = getSyntheticIR(ctx);
+    spaceDelay = ctx.createDelay(4.0);
+    spaceDelay.delayTime.value = 0.35;
+    spaceGain = ctx.createGain();
+    spaceGain.gain.value = 0.5;
+    convolver.connect(spaceGain);
+    spaceDelay.connect(spaceGain);
+    spaceGain.connect(dest);
+  }
+
+  for (let i = 0; i < layers; i++) {
+    if (killToken !== myToken) break;
+    const startTime = now + (i * offset) / 1000;
+    const vol = i === 0 ? 1.0 : Math.pow(decay, i);
+
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+
+    if (mode === 'ROBOT') {
+      src.playbackRate.value = 1.0 - i * 0.06;
+    }
+
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = vol;
+
+    if (mode === 'ROBOT' && i === 0) {
+      const wave = ctx.createWaveShaper();
+      wave.curve = makeDistortionCurve(20);
+      wave.oversample = '2x';
+      src.connect(gainNode);
+      gainNode.connect(wave);
+      wave.connect(dest);
+    } else if (mode === 'SPACE') {
+      src.connect(gainNode);
+      gainNode.connect(convolver);
+      gainNode.connect(spaceDelay);
+      gainNode.connect(dest); // dry signal too
+    } else {
+      // ECHO
+      src.connect(gainNode);
+      gainNode.connect(dest);
+    }
+
+    src.start(startTime);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
 
 let currentWord = '';
-let histItems = [];
+let currentRecording = null; // AudioBuffer
 
-function setAudioStatus(s) {
-  audioStatus.className = s;
+// ═══════════════════════════════════════════════
+// WORD LOAD & PLAY
+// ═══════════════════════════════════════════════
+
+async function loadWord(word, andPlay = false) {
+  if (!word) return;
+  currentWord = word.toUpperCase();
+  $('word-display').textContent = currentWord;
+  $('idle-hint').style.display = 'none';
+
+  // Load note
+  const noteRec = await dbGet('notes', currentWord);
+  $('note-display').innerHTML = noteRec ? renderMd(noteRec.text) : '';
+  $('note-input').value = noteRec ? noteRec.text : '';
+
+  // Load recording
+  await loadRecording(currentWord);
+
+  if (andPlay && currentRecording) {
+    playAudioBuffer(currentRecording);
+  }
+
+  flashWord();
 }
 
-function showWord(w) {
-  wordDisplay.classList.remove('flash','empty');
-  void wordDisplay.offsetWidth;
-  wordDisplay.textContent = w.toUpperCase();
-  wordDisplay.classList.add('flash');
-  transDisplay.classList.remove('hidden');
-  transDisplay.textContent = transCache[w] || '';
-  glowEl.classList.remove('pulse');
-  void glowEl.offsetWidth;
-  glowEl.classList.add('pulse');
-  wordInput.classList.add('flash-border');
-  setTimeout(() => wordInput.classList.remove('flash-border'), 500);
-  btnReplay.classList.add('visible');
-
-  // async fill translation
-  getTranslation(w).then(t => {
-    if (currentWord === w) transDisplay.textContent = t;
-  });
+async function loadRecording(word) {
+  const rec = await dbGet('recordings', word);
+  if (rec) {
+    const ctx = getAudioCtx();
+    currentRecording = objToAudioBuffer(rec.data, ctx);
+    $('btn-replay').disabled = false;
+    $('btn-replay').classList.remove('disabled');
+    $('rec-btn').classList.add('has-rec');
+    $('rec-btn').textContent = '🎙';
+  } else {
+    currentRecording = null;
+    $('btn-replay').disabled = true;
+    $('rec-btn').classList.remove('has-rec');
+  }
 }
 
-// ── REPLAY ──
-btnReplay.addEventListener('click', () => {
-  if (!currentWord) return;
-  btnReplay.classList.add('spinning');
-  setTimeout(() => btnReplay.classList.remove('spinning'), 400);
-  triggerWord(currentWord);
-  wordInput.focus();
+function flashWord() {
+  const el = $('word-display');
+  el.classList.remove('flash');
+  void el.offsetWidth;
+  el.classList.add('flash');
+}
+
+// ═══════════════════════════════════════════════
+// WORD INPUT
+// ═══════════════════════════════════════════════
+
+$('word-input').addEventListener('keydown', async (e) => {
+  if (e.key === 'Enter') {
+    const w = e.target.value.trim().toUpperCase();
+    if (!w) return;
+    e.target.value = '';
+    await saveWordAndLoad(w);
+  }
 });
 
-// ── WORD INPUT ──
-wordInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') { e.preventDefault(); triggerWord(wordInput.value); }
+async function saveWordAndLoad(word) {
+  await dbPut('words', { word, ts: Date.now() });
+  await loadWord(word, true);
+  await refreshList();
+}
+
+// ═══════════════════════════════════════════════
+// NOTE SAVE
+// ═══════════════════════════════════════════════
+
+$('btn-save').addEventListener('click', saveNote);
+$('note-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') saveNote();
 });
 
-// ── NOTE SAVE ──
 async function saveNote() {
+  if (!currentWord) { toast('请先输入单词'); return; }
+  const text = $('note-input').value.trim();
+  if (text) {
+    await dbPut('notes', { word: currentWord, text });
+  } else {
+    await dbDelete('notes', currentWord);
+  }
+  $('note-display').innerHTML = text ? renderMd(text) : '';
+  toast('注释已保存');
+  await refreshList();
+}
+
+// ═══════════════════════════════════════════════
+// REPLAY BUTTON
+// ═══════════════════════════════════════════════
+
+$('btn-replay').addEventListener('click', () => {
+  if (!currentRecording) {
+    // Shake
+    const btn = $('btn-replay');
+    btn.classList.remove('shake');
+    void btn.offsetWidth;
+    btn.classList.add('shake');
+    setTimeout(() => btn.classList.remove('shake'), 400);
+    return;
+  }
+  playAudioBuffer(currentRecording);
+});
+
+// ═══════════════════════════════════════════════
+// TTS REFERENCE
+// ═══════════════════════════════════════════════
+
+$('btn-tts').addEventListener('click', () => {
   if (!currentWord) return;
-  const note = noteInput.value.trim();
-  await dbPutNote({ word: currentWord, note });
-  noteDisplay.textContent = note;
-  btnSaveNote.classList.add('saved');
-  btnSaveNote.textContent = 'SAVED';
-  setTimeout(() => { btnSaveNote.classList.remove('saved'); btnSaveNote.textContent = 'SAVE'; }, 1200);
-  await loadHistory(); // refresh list (note shown inline)
-}
-btnSaveNote.addEventListener('click', saveNote);
-noteInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); saveNote(); } });
-
-// ── HISTORY ──
-async function loadHistory() {
-  histItems = await dbGetAllWords();
-  // attach notes
-  const noteKeys = histItems.map(x => x.word);
-  const notes = await Promise.all(noteKeys.map(w => dbGetNote(w)));
-  histItems.forEach((item, i) => { item._note = notes[i]?.note || ''; });
-  renderHistory();
-  histCount.textContent = histItems.length > 0 ? `(${histItems.length})` : '';
-}
-
-function renderHistory() {
-  if (!histItems.length) { historyBody.innerHTML = '<div class="history-empty">暂无记录</div>'; return; }
-  historyBody.innerHTML = histItems.map(item => `
-    <div class="history-item" data-word="${esc(item.word)}">
-      <div class="hi-main">
-        <div class="hi-word">${esc(item.word.toUpperCase())}</div>
-        ${item.trans ? `<div class="hi-trans">${esc(shortTrans(item.trans))}</div>` : ''}
-        ${item._note ? `<div class="hi-note">✎ ${esc(item._note)}</div>` : ''}
-      </div>
-      <button class="hi-del" data-del="${esc(item.word)}">✕</button>
-    </div>`).join('');
-}
-
-function shortTrans(t) { return t.replace(/[a-z]+：/gi,'').slice(0,50); }
-function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-historyBody.addEventListener('click', e => {
-  const del = e.target.closest('.hi-del');
-  if (del) { e.stopPropagation(); dbDelWord(del.dataset.del).then(loadHistory); return; }
-  const item = e.target.closest('.history-item');
-  if (item) { closePanel('history'); setTimeout(() => triggerWord(item.dataset.word), 60); }
+  try {
+    const utter = new SpeechSynthesisUtterance(currentWord);
+    utter.rate = params.rate;
+    utter.lang = 'en-US';
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utter);
+  } catch(e) { /* silent fail */ }
 });
 
-// ── PANELS ──
-function openPanel(n)  { document.getElementById(`panel-${n}`).classList.add('open'); }
-function closePanel(n) { document.getElementById(`panel-${n}`).classList.remove('open'); }
-document.getElementById('btn-settings').addEventListener('click', () => openPanel('settings'));
-document.getElementById('btn-history').addEventListener('click', () => loadHistory().then(() => openPanel('history')));
-document.getElementById('close-settings').addEventListener('click', () => closePanel('settings'));
-document.getElementById('close-history').addEventListener('click', () => closePanel('history'));
-['settings','history'].forEach(n => {
-  const p = document.getElementById(`panel-${n}`);
-  let sy = 0;
-  p.addEventListener('touchstart', e => { sy = e.touches[0].clientY; }, { passive:true });
-  p.addEventListener('touchend',   e => { if (e.changedTouches[0].clientY - sy > 80) closePanel(n); }, { passive:true });
+// ═══════════════════════════════════════════════
+// RECORDING — MODE A (long press) & MODE B (tap)
+// ═══════════════════════════════════════════════
+
+let pressTimer = null;
+let isLongPress = false;
+let mediaRecorder = null;
+let recChunks = [];
+let recStream = null;
+let vizAnimFrame = null;
+let analyserNode = null;
+
+const recBtn = $('rec-btn');
+
+// Touch events for mobile
+recBtn.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  if (!currentWord) { toast('请先输入单词'); return; }
+  isLongPress = false;
+  pressTimer = setTimeout(() => {
+    isLongPress = true;
+    startQuickRecord();
+  }, 300);
+}, { passive: false });
+
+recBtn.addEventListener('touchend', (e) => {
+  e.preventDefault();
+  if (pressTimer) {
+    clearTimeout(pressTimer);
+    pressTimer = null;
+    if (!isLongPress) {
+      openFinePanel();
+    }
+  } else if (isLongPress) {
+    stopQuickRecord();
+  }
 });
 
-// ── SETTINGS SLIDERS ──
-const sliders = [
-  { id:'sl-layers', val:'val-layers', key:'layers',    fmt:v=>Math.round(v),        parse:Number },
-  { id:'sl-offset', val:'val-offset', key:'offset',    fmt:v=>`${v} ms`,            parse:Number },
-  { id:'sl-decay',  val:'val-decay',  key:'decay',     fmt:v=>(+v).toFixed(2),      parse:Number },
-  { id:'sl-rate',   val:'val-rate',   key:'rate',      fmt:v=>(+v).toFixed(2),      parse:Number },
-  { id:'sl-zh',     val:'val-zh',     key:'zhEnabled', fmt:v=>v==1?'开':'关',       parse:v=>v==1 },
-];
-sliders.forEach(({ id, val, key, fmt, parse }) => {
-  const sl = document.getElementById(id);
-  const vl = document.getElementById(val);
-  const stored = cfg[key];
-  if (stored !== undefined) sl.value = (key==='zhEnabled') ? (stored?1:0) : stored;
-  vl.textContent = fmt(sl.value);
-  sl.addEventListener('input', () => {
-    cfg[key] = parse(sl.value);
-    vl.textContent = fmt(sl.value);
-    localStorage.setItem('vocab-cfg', JSON.stringify(cfg));
-    // invalidate audio cache when rate changes
-    if (key === 'rate') cachedBuffer = {};
+// Mouse fallback for desktop
+recBtn.addEventListener('mousedown', (e) => {
+  if (!currentWord) { toast('请先输入单词'); return; }
+  isLongPress = false;
+  pressTimer = setTimeout(() => {
+    isLongPress = true;
+    startQuickRecord();
+  }, 300);
+});
+recBtn.addEventListener('mouseup', () => {
+  if (pressTimer) {
+    clearTimeout(pressTimer);
+    pressTimer = null;
+    if (!isLongPress) openFinePanel();
+  } else if (isLongPress) {
+    stopQuickRecord();
+  }
+});
+recBtn.addEventListener('mouseleave', () => {
+  if (isLongPress && mediaRecorder && mediaRecorder.state === 'recording') {
+    stopQuickRecord();
+  }
+  if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+});
+
+async function getMic() {
+  if (!recStream || recStream.getTracks().every(t => t.readyState === 'ended')) {
+    recStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+  }
+  return recStream;
+}
+
+async function startQuickRecord() {
+  try {
+    const stream = await getMic();
+    recChunks = [];
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = (e) => recChunks.push(e.data);
+    mediaRecorder.start();
+    recBtn.classList.add('recording');
+    recBtn.textContent = '⏹';
+    startViz(stream);
+  } catch(e) {
+    toast('无法访问麦克风');
+    console.error(e);
+  }
+}
+
+async function stopQuickRecord() {
+  if (!mediaRecorder || mediaRecorder.state !== 'recording') return;
+  mediaRecorder.onstop = async () => {
+    const blob = new Blob(recChunks, { type: 'audio/webm' });
+    await saveRecordingBlob(blob, currentWord);
+    if (currentRecording) playAudioBuffer(currentRecording);
+  };
+  mediaRecorder.stop();
+  stopViz();
+  recBtn.classList.remove('recording');
+  recBtn.textContent = '🎙';
+  isLongPress = false;
+}
+
+async function saveRecordingBlob(blob, word) {
+  const arrayBuf = await blob.arrayBuffer();
+  const ctx = getAudioCtx();
+  try {
+    const audioBuf = await ctx.decodeAudioData(arrayBuf);
+    currentRecording = audioBuf;
+    const obj = audioBufferToObj(audioBuf);
+    await dbPut('recordings', { word, data: obj });
+    $('btn-replay').disabled = false;
+    $('rec-btn').classList.add('has-rec');
+    toast('录音已保存');
+    await refreshList();
+  } catch(e) {
+    toast('录音解码失败');
+    console.error(e);
+  }
+}
+
+function startViz(stream) {
+  const ctx = getAudioCtx();
+  const src = ctx.createMediaStreamSource(stream);
+  analyserNode = ctx.createAnalyser();
+  analyserNode.fftSize = 64;
+  src.connect(analyserNode);
+  const bars = document.querySelectorAll('.viz-bar');
+  const data = new Uint8Array(analyserNode.frequencyBinCount);
+  function draw() {
+    vizAnimFrame = requestAnimationFrame(draw);
+    analyserNode.getByteFrequencyData(data);
+    bars.forEach((b, i) => {
+      const v = (data[i * 2] || 0) / 255;
+      b.style.height = Math.max(4, v * 28) + 'px';
+    });
+  }
+  $('rec-viz').classList.add('active');
+  draw();
+}
+
+function stopViz() {
+  if (vizAnimFrame) cancelAnimationFrame(vizAnimFrame);
+  $('rec-viz').classList.remove('active');
+  const bars = document.querySelectorAll('.viz-bar');
+  bars.forEach(b => b.style.height = '4px');
+}
+
+// ═══════════════════════════════════════════════
+// FINE PANEL
+// ═══════════════════════════════════════════════
+
+let fineTempBuffer = null;
+let fineRecording = false;
+let fineChunks = [];
+let fineMediaRecorder = null;
+
+function openFinePanel() {
+  $('fine-word-label').textContent = currentWord || '—';
+  $('fine-status').textContent = '单击录音开始';
+  $('fine-play-btn').disabled = true;
+  $('fine-confirm-btn').disabled = true;
+  $('fine-rec-btn').textContent = '● 录音';
+  $('fine-rec-btn').className = 'fine-btn danger';
+  fineTempBuffer = null;
+  fineRecording = false;
+  $('fine-panel').classList.add('open');
+}
+
+function closeFinePanel() {
+  stopViz();
+  if (fineMediaRecorder && fineMediaRecorder.state === 'recording') {
+    fineMediaRecorder.stop();
+  }
+  $('fine-panel').classList.remove('open');
+}
+
+$('fine-cancel').addEventListener('click', closeFinePanel);
+
+$('fine-rec-btn').addEventListener('click', async () => {
+  if (!fineRecording) {
+    // Start
+    try {
+      const stream = await getMic();
+      fineChunks = [];
+      fineMediaRecorder = new MediaRecorder(stream);
+      fineMediaRecorder.ondataavailable = (e) => fineChunks.push(e.data);
+      fineMediaRecorder.start();
+      fineRecording = true;
+      $('fine-rec-btn').textContent = '■ 停止';
+      $('fine-status').textContent = '录音中…';
+      startViz(stream);
+    } catch(e) {
+      toast('无法访问麦克风'); return;
+    }
+  } else {
+    // Stop
+    fineMediaRecorder.onstop = async () => {
+      const blob = new Blob(fineChunks, { type: 'audio/webm' });
+      const arrayBuf = await blob.arrayBuffer();
+      const ctx = getAudioCtx();
+      try {
+        fineTempBuffer = await ctx.decodeAudioData(arrayBuf);
+        $('fine-play-btn').disabled = false;
+        $('fine-confirm-btn').disabled = false;
+        $('fine-status').textContent = '试听或确认保存';
+      } catch(e) {
+        $('fine-status').textContent = '解码失败，请重试';
+      }
+    };
+    fineMediaRecorder.stop();
+    stopViz();
+    fineRecording = false;
+    $('fine-rec-btn').textContent = '● 重录';
+    $('fine-status').textContent = '处理中…';
+  }
+});
+
+$('fine-play-btn').addEventListener('click', () => {
+  if (fineTempBuffer) playAudioBuffer(fineTempBuffer);
+});
+
+$('fine-confirm-btn').addEventListener('click', async () => {
+  if (!fineTempBuffer) return;
+  currentRecording = fineTempBuffer;
+  const obj = audioBufferToObj(fineTempBuffer);
+  await dbPut('recordings', { word: currentWord, data: obj });
+  $('btn-replay').disabled = false;
+  $('rec-btn').classList.add('has-rec');
+  toast('录音已保存');
+  closeFinePanel();
+  playAudioBuffer(currentRecording);
+  await refreshList();
+});
+
+// ═══════════════════════════════════════════════
+// LIST PANEL
+// ═══════════════════════════════════════════════
+
+async function refreshList() {
+  const words = await dbGetAll('words');
+  words.sort((a, b) => b.ts - a.ts);
+  const recKeys = await dbGetAllKeys('recordings');
+  const recSet = new Set(recKeys);
+
+  $('word-count').textContent = words.length + ' word' + (words.length !== 1 ? 's' : '');
+
+  const list = $('history-list');
+  list.innerHTML = '';
+  for (const w of words) {
+    const noteRec = await dbGet('notes', w.word);
+    const item = document.createElement('div');
+    item.className = 'history-item';
+
+    const wordEl = document.createElement('div');
+    wordEl.className = 'hist-word';
+    wordEl.textContent = w.word;
+
+    const noteEl = document.createElement('div');
+    noteEl.className = 'hist-note';
+    noteEl.textContent = noteRec ? noteRec.text.replace(/\*\*|`|\*/g,'') : '';
+
+    const tsEl = document.createElement('div');
+    tsEl.className = 'hist-ts';
+    tsEl.textContent = formatTs(w.ts);
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'hist-del';
+    delBtn.textContent = '✕';
+    delBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await dbDelete('words', w.word);
+      // notes and recordings preserved
+      if (currentWord === w.word) {
+        $('word-display').textContent = '—';
+        currentWord = '';
+        currentRecording = null;
+        $('btn-replay').disabled = true;
+        $('rec-btn').classList.remove('has-rec');
+        $('note-display').innerHTML = '';
+        $('idle-hint').style.display = '';
+      }
+      await refreshList();
+    });
+
+    item.appendChild(wordEl);
+    if (recSet.has(w.word)) {
+      const dot = document.createElement('div');
+      dot.className = 'hist-rec-dot';
+      dot.title = '有录音';
+      item.appendChild(dot);
+    }
+    item.appendChild(noteEl);
+    item.appendChild(tsEl);
+    item.appendChild(delBtn);
+
+    item.addEventListener('click', async () => {
+      closeAllPanels();
+      await loadWord(w.word, true);
+    });
+    list.appendChild(item);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// TUNE PANEL
+// ═══════════════════════════════════════════════
+
+function initSliders() {
+  const sliders = [
+    { id: 'sl-layers', val: 'val-layers', key: 'layers', fmt: v => Math.round(v) },
+    { id: 'sl-offset', val: 'val-offset', key: 'offset', fmt: v => Math.round(v) + 'ms' },
+    { id: 'sl-decay',  val: 'val-decay',  key: 'decay',  fmt: v => parseFloat(v).toFixed(2) },
+    { id: 'sl-rate',   val: 'val-rate',   key: 'rate',   fmt: v => parseFloat(v).toFixed(2) + '×' },
+  ];
+  sliders.forEach(s => {
+    const el = $(s.id);
+    const val = $(s.val);
+    el.addEventListener('input', () => {
+      params[s.key] = s.key === 'layers' ? parseInt(el.value) : parseFloat(el.value);
+      val.textContent = s.fmt(el.value);
+      if (s.key === 'offset' || s.key === 'decay') syntheticIR = null; // reset if SPACE changes
+    });
+  });
+}
+
+document.querySelectorAll('.mode-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentMode = tab.dataset.mode;
   });
 });
 
-// ── INIT ──
-(async () => {
-  await initDB();
-  await loadHistory();
-  speechSynthesis.getVoices();
-  speechSynthesis.addEventListener('voiceschanged', ()=>{});
-  wordInput.focus();
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
-})();
+// ═══════════════════════════════════════════════
+// PANEL TOGGLE
+// ═══════════════════════════════════════════════
+
+function closeAllPanels() {
+  $('list-panel').classList.remove('open');
+  $('tune-panel').classList.remove('open');
+  $('btn-list').classList.remove('active');
+  $('btn-tune').classList.remove('active');
+}
+
+$('btn-list').addEventListener('click', async () => {
+  const isOpen = $('list-panel').classList.contains('open');
+  closeAllPanels();
+  if (!isOpen) {
+    await refreshList();
+    $('list-panel').classList.add('open');
+    $('btn-list').classList.add('active');
+  }
+});
+
+$('btn-tune').addEventListener('click', () => {
+  const isOpen = $('tune-panel').classList.contains('open');
+  closeAllPanels();
+  if (!isOpen) {
+    $('tune-panel').classList.add('open');
+    $('btn-tune').classList.add('active');
+  }
+});
+
+// ═══════════════════════════════════════════════
+// SERVICE WORKER
+// ═══════════════════════════════════════════════
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+
+async function init() {
+  await openDB();
+  initSliders();
+  // Load most recent word if any
+  const words = await dbGetAll('words');
+  if (words.length > 0) {
+    words.sort((a, b) => b.ts - a.ts);
+    await loadWord(words[0].word, false);
+    $('idle-hint').style.display = 'none';
+  }
+}
+
+init().catch(console.error);
 </script>
 </body>
 </html>
